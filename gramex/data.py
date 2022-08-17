@@ -1598,6 +1598,7 @@ def _delete_mongodb(url, controls, args, meta, database=None, collection=None, q
 
 def _update_mongodb(url, controls, args, meta, database=None, collection=None, query=None,
                     id=[], **kwargs):
+    app_log.debug('update mongodb')
     table = _mongodb_collection(url, database, collection, **kwargs)
     query = _mongodb_query(args, table, id=id)
     row = table.find_one(query)
