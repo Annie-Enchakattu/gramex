@@ -1599,21 +1599,23 @@ def _delete_mongodb(url, controls, args, meta, database=None, collection=None, q
 def _update_mongodb(url, controls, args, meta, database=None, collection=None, query=None,
                     id=[], **kwargs):
     app_log.debug('update mongodb')
-    table = _mongodb_collection(url, database, collection, **kwargs)
-    query = _mongodb_query(args, table, id=id)
-    row = table.find_one(query)
-    if not row:
-        return 0
+    try:
+        table = _mongodb_collection(url, database, collection, **kwargs)
+        query = _mongodb_query(args, table, id=id)
+        row = table.find_one(query)
+        if not row:
+            return 0
 
-    values = {key: val[-1] for key, val in dict(args).items() if key not in id}
-    for key in values.keys():
-        convert = _convertor(type(row[key])) if key in row else lambda v: v
-        values[key] = convert(values[key])
+        values = {key: val[-1] for key, val in dict(args).items() if key not in id}
+        for key in values.keys():
+            convert = _convertor(type(row[key])) if key in row else lambda v: v
+            values[key] = convert(values[key])
 
-    result = table.update_many(query, {'$set': _mongodb_json(values)})
-    return result.modified_count
-
-
+        result = table.update_many(query, {'$set': _mongodb_json(values)})
+        return result.modified_count
+    except Exception as e:
+        app_log.debug(str(e))
+    
 def _insert_mongodb(url, rows, meta=None, database=None, collection=None, **kwargs):
     table = _mongodb_collection(url, database, collection, **kwargs)
     result = table.insert_many([_mongodb_json(row) for row in rows.to_dict(orient='records')])
