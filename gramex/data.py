@@ -1612,6 +1612,7 @@ def _update_mongodb(url, controls, args, meta, database=None, collection=None, q
             values[key] = convert(values[key])
 
         result = table.update_many(query, {'$set': _mongodb_json(values)})
+        app_log.debug(result.modified_count)
         return result.modified_count
     except Exception as e:
         app_log.debug(str(e))
